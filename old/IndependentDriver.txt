@@ -1,0 +1,56 @@
+import java.io.FileNotFoundException;
+import java.util.*;
+
+public class IndependentDriver {
+    ArrayList<Scan> myScans;
+
+    public static void main(String[] args) throws FileNotFoundException{
+        //@author Harrison York
+        //Intro to device use and credits
+            System.out.println("SURGERY 1 DEVICE DRIVER");
+            System.out.println("");
+            System.out.println("DESIGN TEAM:");
+            System.out.println("Jaden Coward");
+            System.out.println("Vidal de Paz Benito");
+            System.out.println("Luke Villalpando");
+            System.out.println("Harrison York");
+            System.out.println("");
+            System.out.println("DUKE UNIVERSITY");
+            System.out.println("EGR 101 - FALL 2022");
+            System.out.println();
+        
+        //FILE OF NAMES AND TOOL IDS
+        String filename = "data/mapper.txt";
+            MapperReader myMapper = new MapperReader(filename);
+            //uses myMapper to get list of tag names and IDs
+            TreeMap<String, String> myTree = myMapper.getMap();
+
+        //FILE OF DATA
+        filename = "data/data.txt";
+            DataReader myData = new DataReader(filename, myTree);
+            //each element is one tag name and corresponding ID
+            ArrayList<String> idsFromInput = new ArrayList<String>();
+            idsFromInput = myData.getFormatted();
+
+            System.out.println("-----");
+            System.out.println("SCAN LOG:");
+            System.out.println();
+            for(int i=0;i<idsFromInput.size();i+=2){
+                System.out.println(idsFromInput.get(i));
+                System.out.println(idsFromInput.get(i+1));
+                System.out.println();
+            }
+
+            ArrayList<String> scoreList = new ArrayList<String>();
+            scoreList = myData.getScores();
+            for(String stringS: scoreList){
+                System.out.println(stringS);
+            }
+    }
+
+    public ArrayList<Scan> getScans(){
+        return myScans;
+    }    
+    
+}
+

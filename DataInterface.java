@@ -1,0 +1,277 @@
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.*;
+import java.awt.*;
+import java.awt.event.*;
+
+import javax.swing.*;
+
+public class DataInterface {
+    JFrame frameObj;
+    ArrayList<Scan> myScans;
+    TreeMap<String, ArrayList<String>> myMaps;
+    int rows;
+    int cols=7;
+
+    public static void main(String[] args) throws FileNotFoundException{
+        DataInterface hi = new DataInterface();
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public DataInterface() throws FileNotFoundException{
+        frameObj=new JFrame("Tag Tracker Data Interface");
+        frameObj.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        //Home Screen - Top Row
+        frameObj.add(new JLabel(" ", SwingConstants.CENTER));
+        JLabel welcome = new JLabel("Tag Tracker Data Interface", SwingConstants.CENTER);
+        frameObj.add(welcome);
+        frameObj.add(new JLabel(" ", SwingConstants.CENTER));
+
+        //Home Screen - Second Row
+        JLabel instructions = new JLabel("<html>Input data from the SD card file:<br>Enter when done.</html>", SwingConstants.CENTER);
+        frameObj.add(instructions);
+        JTextField inputData = new JTextField("");
+        frameObj.add(inputData);
+        frameObj.add(new JLabel(" ", SwingConstants.CENTER));
+
+        //Home Screen - Third Row
+        JLabel aa = new JLabel(" ", SwingConstants.CENTER);
+        frameObj.add(aa);
+        JLabel ab = new JLabel(" ", SwingConstants.CENTER);
+        frameObj.add(ab);
+        JLabel ac = new JLabel(" ", SwingConstants.CENTER);
+        frameObj.add(ac);
+
+        //Home Screen - Fourth Row
+        JLabel ba = new JLabel(" ", SwingConstants.CENTER);
+        frameObj.add(ba);
+        JLabel bb = new JLabel("<html>Surgery 1<br>Duke University<br>Harrison York</html>", SwingConstants.CENTER);
+        frameObj.add(bb);
+        JLabel bc = new JLabel(" ", SwingConstants.CENTER);
+        frameObj.add(bc);
+
+        frameObj.setLayout(new GridLayout(4,3));
+
+        //action listener for input of data into text field
+        StringBuilder totalInputText = new StringBuilder();
+        inputData.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt){
+                String text = inputData.getText();
+                String[] splitText = text.split(" Card");
+                String fixed = String.join("\nCard", splitText);
+                String[] split2 = fixed.split("TIME:");
+                String fixed2 = String.join("\nTIME:", split2);
+            
+                totalInputText.append(fixed2+"\nEND\n\n");
+                inputData.selectAll();   
+                try {
+                    doSomething(totalInputText.toString());
+                } catch (FileNotFoundException e) {
+                    System.out.println("File not found!");
+                    e.printStackTrace();
+                }
+            }
+        });
+   
+        frameObj.setSize(1000,1000);
+        frameObj.setVisible(true); 
+    }
+    
+    public ArrayList<Scan> getScans(){
+        return myScans;
+    }  
+
+    public void doSomething(String input) throws FileNotFoundException{
+        try (PrintWriter textFile = new PrintWriter("data/data.txt")) {
+            textFile.println(input);
+        }
+        readEverything();
+        showButtons();
+    }
+
+    public void readEverything() throws FileNotFoundException{
+        //FILE OF NAMES AND TOOL IDS
+        String filename = "data/mapper.txt";
+        MapperReader myMapper = new MapperReader(filename);
+        //uses myMapper to get list of tag names and IDs
+        TreeMap<String, String> myTree = myMapper.getMap();
+
+        //FILE OF DATA
+        filename = "data/data.txt";
+        DataReader myData = new DataReader(filename, myTree);
+        ArrayList<Scan> myScans = myData.getScans();
+
+        ArrayList<Scan> output = new ArrayList<Scan>();
+        //searches for the next scan of same tool and sets end point
+        for(int i=0;i<myScans.size();i++){
+            Scan scI = myScans.get(i);
+                for(int j=i+1;j<myScans.size();j++){
+                    Scan scJ = myScans.get(j);
+                    if((scI.getRealID().equals(scJ.getRealID()))&&scJ.getRead()==true&&scI.getRead()==true){
+                        scI.setEndDate(scJ.getDate());
+                        scI.setEndTime(scJ.getTime());
+                        scJ.setRead(false);
+                        output.add(scI);
+                        break;
+                    }
+                }
+        }
+
+        //******FULL SET OF SCANS with start and end times******
+        this.myScans=output;
+        for(Scan sss: myScans){
+            System.out.println(sss.getRealID()+""+sss.getTime()+sss.getEndTime());
+        }
+        //******Sets map of names to the start and end times */
+        setMapped(myScans);
+    }
+
+    public void showButtons(){
+        //gives layout of rows 2-end
+        JButton displayChron = new JButton("Chronological Sorting");
+        JButton mappedOut = new JButton("Tag Sorting");
+
+        frameObj.getContentPane().removeAll();
+        frameObj.repaint();
+        //Home Screen - Top Row
+        frameObj.add(new JLabel(" ", SwingConstants.CENTER));
+        JLabel welcome = new JLabel("Surgery 1 Data Interface", SwingConstants.CENTER);
+        frameObj.add(welcome);
+        frameObj.add(new JLabel(" ", SwingConstants.CENTER));
+
+        //Home Screen - Second Row
+        JLabel instructions = new JLabel("<html>Input data from the SD card file:<br>Enter when done.</html>", SwingConstants.CENTER);
+        frameObj.add(instructions);
+        JTextField inputData = new JTextField("");
+        frameObj.add(inputData);
+        frameObj.add(new JLabel(" ", SwingConstants.CENTER));
+
+        //Home Screen - Third Row
+        JLabel aa = new JLabel(" ", SwingConstants.CENTER);
+        frameObj.add(aa);
+        frameObj.add(displayChron);
+        frameObj.add(mappedOut);
+
+        //Home Screen - Fourth Row
+        JLabel ba = new JLabel(" ", SwingConstants.CENTER);
+        frameObj.add(ba);
+        JLabel bb = new JLabel("<html>Surgery 1<br>Duke University<br>Harrison York</html>", SwingConstants.CENTER);
+        frameObj.add(bb);
+        JLabel bc = new JLabel(" ", SwingConstants.CENTER);
+        frameObj.add(bc);
+        
+        GridLayout layout = new GridLayout(4, 3);
+        frameObj.setLayout(layout);
+        frameObj.setSize(1000,1000);
+        frameObj.setVisible(true);
+
+        //action listener for mapped out by tool
+        mappedOut.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frameObj.getContentPane().removeAll();
+                frameObj.repaint();
+                int colsLOL = myMaps.keySet().size();
+                int rowsLOL = 0;
+                ArrayList<String> namesList = new ArrayList<>();
+                for(String name: myMaps.keySet()){
+                    namesList.add(name);
+                    if(myMaps.get(name).size()>rowsLOL){
+                        rowsLOL = myMaps.get(name).size();
+                    }
+                }
+                for(String n: namesList){
+                    JLabel nn = new JLabel(n, SwingConstants.CENTER);
+                    frameObj.add(nn);
+                }
+                for(int i=0;i<rowsLOL;i++){
+                    for(int j=0;j<colsLOL;j++){
+                        String currentName = namesList.get(j);
+                        String currentAdd = " ";
+                        if(myMaps.get(currentName).size()>i){
+                            currentAdd = myMaps.get(currentName).get(i);
+                        }
+                        frameObj.add(new JLabel(currentAdd, SwingConstants.CENTER));
+                    }
+                }
+                GridLayout newlayout = new GridLayout(rowsLOL+1, colsLOL-1);
+                frameObj.setLayout(newlayout);
+                frameObj.setSize(1000,1000);
+                frameObj.setVisible(true); 
+            }
+        });
+
+        //action listener for click of chronological sort button
+        displayChron.addActionListener(new ActionListener() {
+                /* (non-Javadoc)
+                 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+                 */
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    //CLEARS FRAME
+                    frameObj.getContentPane().removeAll();
+                    frameObj.repaint();
+                    int rowsCopy=myScans.size();
+                    //header row
+                        JLabel h = new JLabel("Tag Name", SwingConstants.CENTER);
+                        frameObj.add(h);
+                        h = new JLabel("Tag ID", SwingConstants.CENTER);
+                        frameObj.add(h);
+                        h = new JLabel("Type", SwingConstants.CENTER);
+                        frameObj.add(h);
+                        h = new JLabel("Time Used", SwingConstants.CENTER);
+                        frameObj.add(h);
+                        h = new JLabel("Start Time", SwingConstants.CENTER);
+                        frameObj.add(h);
+                        h = new JLabel("End Time", SwingConstants.CENTER);
+                        frameObj.add(h);
+                        h = new JLabel("Date", SwingConstants.CENTER);
+                        frameObj.add(h);
+                    for(int i=0;i<myScans.size();i++){
+                        Scan sc = myScans.get(i);
+                        JLabel b = new JLabel(sc.getName(), SwingConstants.CENTER);
+                        frameObj.add(b);
+                        b = new JLabel(sc.getRealID(), SwingConstants.CENTER);
+                        frameObj.add(b);
+                        b = new JLabel(sc.getType(), SwingConstants.CENTER);
+                        frameObj.add(b);
+                        b = new JLabel(sc.getTimeDiff(), SwingConstants.CENTER);
+                        frameObj.add(b);
+                        b = new JLabel(sc.getTime(), SwingConstants.CENTER);
+                        frameObj.add(b);
+                        b = new JLabel(sc.getEndTime(), SwingConstants.CENTER);
+                        frameObj.add(b);
+                        b = new JLabel(sc.getDate(), SwingConstants.CENTER);
+                        frameObj.add(b);
+                    }
+                    GridLayout layout = new GridLayout(rowsCopy+1,7);
+                    frameObj.setLayout(layout);
+                    frameObj.setSize(1000,1000);
+                    frameObj.setVisible(true); 
+                }
+            });
+    }
+
+    public void setMapped(ArrayList<Scan> myScans2){
+        ArrayList<Scan> destroy = myScans2;
+        TreeMap<String, ArrayList<String>> myMap = new TreeMap<>();
+        for(Scan sc: destroy){
+            if(!myMap.containsKey(sc.getName())){
+                ArrayList<String> times = new ArrayList<>();
+                if(sc.getRead()==true&&(Integer.parseInt(sc.getEndHour())!=0||Integer.parseInt(sc.getEndMinute())!=0||Integer.parseInt(sc.getEndSecond())!=0)){
+                    times.add("<html>Start: "+sc.getTime()+"<br/>"+"End: "+sc.getEndTime()+"</html>");
+                }
+                myMap.putIfAbsent(sc.getName(), times);
+            }
+            else{
+                if(sc.getRead()==true&&Integer.parseInt(sc.getEndHour())!=0&&Integer.parseInt(sc.getEndMinute())!=0&&Integer.parseInt(sc.getEndSecond())!=0){
+                    myMap.get(sc.getName()).add("<html>Start: "+sc.getTime()+"<br/>End: "+sc.getEndTime()+"</html>");
+                }
+            }
+        }
+        this.myMaps=myMap;
+    }
+}

@@ -1,0 +1,67 @@
+import java.io.FileNotFoundException;
+import java.util.*;
+
+public class SurgeryReader {
+    ArrayList<Scan> myScans;
+
+    public static void main(String[] args) throws FileNotFoundException{
+        System.out.println("");
+        //FILE OF NAMES AND TOOL IDS
+        String filename = "data/mapper.txt";
+            MapperReader myMapper = new MapperReader(filename);
+            //uses myMapper to get list of tag names and IDs
+            TreeMap<String, String> myTree = myMapper.getMap();
+
+        //FILE OF DATA
+        filename = "data/data.txt";
+            DataReader myData = new DataReader(filename, myTree);
+            ArrayList<Scan> myScans = myData.getScans();
+
+            ArrayList<Scan> output = new ArrayList<Scan>();
+            //searches for the next scan of same tool and sets end point
+            for(int i=0;i<myScans.size();i++){
+                Scan scI = myScans.get(i);
+                for(int j=i+1;j<myScans.size();j++){
+                    Scan scJ = myScans.get(j);
+                    if((scI.getID().equals(scJ.getID()))&&scJ.getRead()==true&&scI.getRead()==true){
+                        scI.setEndDate(scJ.getDate());
+                        scI.setEndTime(scJ.getTime());
+                        scJ.setRead(false);
+                        output.add(scI);
+                        j=myScans.size()-1;
+                    }
+                }
+            }
+
+            //******FULL SET OF SCANS with start and end times******
+            myScans=output;
+
+            //formatted output
+            int counter=0;
+            for(Scan sc: myScans){
+                if(sc.getRead()==true){
+                    //System.out.println(sc);
+                        System.out.println(sc.getName()+",\t"+sc.getRealID()+",\t"+sc.getType()+",\t"+
+                        sc.getHour()+":"+sc.getMinute()+":"+sc.getSecond()+",\t"+sc.getMonth()+"/"+sc.getDay()+"/"+sc.getYear()+",\t"+
+                        sc.getEndHour()+":"+sc.getEndMinute()+":"+sc.getEndSecond()+",\t"+sc.getEndMonth()+"/"+sc.getEndDay()+"/"+sc.getEndYear()
+                        );
+                    /*else{
+                        System.out.println("{\nid: "+sc.getID()+",\n"+
+                        "start: new Date("+sc.getYear()+", "+sc.getMonth()+"-1, "+sc.getDay()+", "+sc.getHour()+", "+Integer.parseInt(sc.getMinute())+", "+sc.getSecond()+"),\n"+
+                        "end: new Date("+sc.getEndYear()+", "+sc.getEndMonth()+"-1, "+sc.getEndDay()+", "+sc.getEndHour()+", "+sc.getEndMinute()+", "+sc.getEndSecond()+"),\n"+
+                        "name: \""+sc.getName()+"\",\n"+
+                        "color: \""+sc.getColor()+"\"\n"+
+                        "},"
+                        );
+                    }*/
+                    
+                }
+                counter++;
+            }
+    }
+
+    public ArrayList<Scan> getScans(){
+        return myScans;
+    }   
+    
+}
