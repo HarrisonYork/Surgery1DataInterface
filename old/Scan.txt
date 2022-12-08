@@ -1,0 +1,142 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+//import java.util.HexFormat;
+import java.util.Scanner;
+
+public class Scan {
+    //object should store data from two consecutive lines of sd card:
+    //tag name, id, time and date of scan
+    
+    String name;
+    String id;
+    String time;
+    String date;
+    boolean isTool;
+
+    public Scan(){
+        name="no name";
+        id="000000";
+        time="00:00:00";
+        date="00/00/0000";
+        isTool=true;
+    }
+
+    public Scan(String name, String id, String time, String data){
+        name="no name";
+        id="000000";
+        time="00:00:00";
+        date="00/00/0000";
+        isTool=true;
+    }
+
+    public Scan(String fileName) throws FileNotFoundException{
+        File f = new File(fileName);
+        name="no name";
+        id="000000";
+        time="00:00:00";
+        date="00/00/0000";
+        isTool=true;
+        reader(f);
+    }
+
+    public void reader(File f) throws FileNotFoundException{
+        Scanner scan = new Scanner("data/data.csv");
+        String myLine = scan.nextLine();
+        boolean fullBreak = false;
+        if(!myLine.equals("END")){
+            while(myLine.length()<=4){
+                myLine=scan.nextLine();
+                if(myLine.equals("END")){
+                    fullBreak = true;
+                }
+                if(fullBreak){
+                    scan.close();
+                    break;
+                }
+            }
+            if(fullBreak){
+                scan.close();
+                return;
+            }
+            String[] data = myLine.split(", ");
+            id = data[0];
+            time = data[1];
+            date = data[2];
+        }
+        scan.close();
+    }
+    
+    public String getName(){
+        if(name==null){
+            return null;
+        }
+        if(name.contains("Surgeon")||name.contains("surgeon")){
+            isTool=false;
+        }
+        else if(name.contains("Tool")||name.contains("tool")){
+            isTool = true;
+        }
+        return name.substring(0);
+    }
+
+    public String getType(){
+        if(name.contains("Resident")||name.contains("resident")){
+            return "resident surgeon";
+        }
+        else if(name.contains("Attending")||name.contains("attending")){
+            return "attending surgeon";
+        }
+        else if(name.contains("Tool")||name.contains("tool")){
+            return "tool";
+        }
+        return "tool";
+    }
+
+    public String getID(){
+        return id;
+    }
+
+    public String getTime(){
+        return time;
+    }
+
+    public String getDate(){
+        return date;
+    }
+
+    public void setName(String n){
+        this.name = n;
+    }
+
+    public void setID(String id){
+        this.id = id;
+    }
+
+    public void setTime(String t){
+        this.time = t;
+    }
+
+    public void setDate(String date){
+        this.date = date;
+    }
+
+    public String toString(){
+        String output = new String();
+        output=name+"\n"
+            +id+"\n"
+            +time+"\n"
+            +date;
+        return output;
+    }
+
+    /*public String getTimeDiff(){
+        Integer convertToSecStart = (Integer.parseInt(getHour())*60*60)+(Integer.parseInt(getMinute())*60)+(Integer.parseInt(getSecond()));
+        Integer convertToSecEnd = (Integer.parseInt(getEndHour())*60*60)+(Integer.parseInt(getEndMinute())*60)+(Integer.parseInt(getEndSecond()));
+        Integer difference = convertToSecEnd-convertToSecStart;
+        Integer getDH = difference/60/60;
+        Integer getDM = (difference/60)%60;
+        Integer getDS = difference%60;
+        this.timeDifference=getDH+":"+getDM+":"+getDS;
+        return timeDifference;
+    }*/
+}

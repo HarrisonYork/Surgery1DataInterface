@@ -32,7 +32,6 @@ public class DataReader {
         boolean fullBreak = false;
         while(!myNextLine.equals("END")){
             String myLine = myNextLine;
-            Scan myScan = new Scan();
             while(myLine.length()<=10){
                 myLine=scan.nextLine();
                 if(myLine.equals("END")){
@@ -47,50 +46,19 @@ public class DataReader {
                 scan.close();
                 break;
             }
-            String addThis = new String();
-            
-            if(myLine.contains("Card UID: ")){
-                String[] uidd = myLine.split("UID: ");
-                String[] fixedMaybe = uidd[1].split(" ", 2);
-                String tagName = myTagNames.get(fixedMaybe[0]);
-                if(tagName==null){
-                    tagName = "UNEXPECTED UID";
-                }
-                myScan.setName(tagName);
-                String uid = myLine.substring(10);
-                myScan.setID(uid);
-                
-                addThis = "SCAN - TAG NAME: "+tagName+" // UID: "+uid;
-                output.add(addThis);
-                if(!myScores.containsKey(tagName)){
-                    myScores.putIfAbsent(tagName, 1);
-                }
-                else if(myScores.containsKey(tagName)){
-                    myScores.put(tagName, myScores.get(tagName)+1);
-                }
+            String[] currentData = myLine.split(", ");
+            String currentName = myTagNames.get(currentData[0]);
+            if(currentName==null){
+                currentName="unexpected uid";
             }
-            myLine = scan.nextLine();
-            if(myLine.substring(0,6).equals("TIME: ")){
-                String myTime = myLine.substring(6);
-                if(myTime==null){
-                    myTime = " UNEXPECTED TIME";
-                }
-                addThis = "TIME SCANNED: "+myTime;
-                String[] timeSplit = myTime.split(" ");
-                String timeOnly = timeSplit[0];
-                String dateOnly = timeSplit[1];
-                myScan.setDateAndTime(myTime);
-                myScan.setTime(timeOnly);
-                myScan.setDate(dateOnly);
-                output.add(addThis);
-            }
-            myScans.add(myScan);
+            Scan current = new Scan(currentName, currentData[0], currentData[1], currentData[2]);
+            myScans.add(current);
             myNextLine = scan.nextLine();
         }
         scan.close();
         this.output = output;
     }
-
+    /* 
     public ArrayList<String> getFormatted(){
         return output;
     }
@@ -104,7 +72,7 @@ public class DataReader {
         }
 
         return scoreOutput;
-    }
+    }*/
 
     public ArrayList<Scan> getScans(){
         return myScans;

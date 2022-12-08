@@ -85,7 +85,7 @@ public class DataInterface {
     }  
 
     public void doSomething(String input) throws FileNotFoundException{
-        try (PrintWriter textFile = new PrintWriter("data/data.txt")) {
+        try (PrintWriter textFile = new PrintWriter("data/data.csv")) {
             textFile.println(input);
         }
         readEverything();
@@ -100,12 +100,12 @@ public class DataInterface {
         TreeMap<String, String> myTree = myMapper.getMap();
 
         //FILE OF DATA
-        filename = "data/data.txt";
+        filename = "data/data.csv";
         DataReader myData = new DataReader(filename, myTree);
         ArrayList<Scan> myScans = myData.getScans();
 
         ArrayList<Scan> output = new ArrayList<Scan>();
-        //searches for the next scan of same tool and sets end point
+        /*searches for the next scan of same tool and sets end point
         for(int i=0;i<myScans.size();i++){
             Scan scI = myScans.get(i);
                 for(int j=i+1;j<myScans.size();j++){
@@ -118,12 +118,12 @@ public class DataInterface {
                         break;
                     }
                 }
-        }
+        }*/
 
         //******FULL SET OF SCANS with start and end times******
         this.myScans=output;
         for(Scan sss: myScans){
-            System.out.println(sss.getRealID()+""+sss.getTime()+sss.getEndTime());
+            System.out.println(sss.getID()+" "+sss.getTime());
         }
         //******Sets map of names to the start and end times */
         setMapped(myScans);
@@ -222,11 +222,7 @@ public class DataInterface {
                         frameObj.add(h);
                         h = new JLabel("Type", SwingConstants.CENTER);
                         frameObj.add(h);
-                        h = new JLabel("Time Used", SwingConstants.CENTER);
-                        frameObj.add(h);
                         h = new JLabel("Start Time", SwingConstants.CENTER);
-                        frameObj.add(h);
-                        h = new JLabel("End Time", SwingConstants.CENTER);
                         frameObj.add(h);
                         h = new JLabel("Date", SwingConstants.CENTER);
                         frameObj.add(h);
@@ -234,20 +230,16 @@ public class DataInterface {
                         Scan sc = myScans.get(i);
                         JLabel b = new JLabel(sc.getName(), SwingConstants.CENTER);
                         frameObj.add(b);
-                        b = new JLabel(sc.getRealID(), SwingConstants.CENTER);
+                        b = new JLabel(sc.getID(), SwingConstants.CENTER);
                         frameObj.add(b);
                         b = new JLabel(sc.getType(), SwingConstants.CENTER);
                         frameObj.add(b);
-                        b = new JLabel(sc.getTimeDiff(), SwingConstants.CENTER);
-                        frameObj.add(b);
                         b = new JLabel(sc.getTime(), SwingConstants.CENTER);
-                        frameObj.add(b);
-                        b = new JLabel(sc.getEndTime(), SwingConstants.CENTER);
                         frameObj.add(b);
                         b = new JLabel(sc.getDate(), SwingConstants.CENTER);
                         frameObj.add(b);
                     }
-                    GridLayout layout = new GridLayout(rowsCopy+1,7);
+                    GridLayout layout = new GridLayout(rowsCopy+1,5);
                     frameObj.setLayout(layout);
                     frameObj.setSize(1000,1000);
                     frameObj.setVisible(true); 
@@ -261,15 +253,11 @@ public class DataInterface {
         for(Scan sc: destroy){
             if(!myMap.containsKey(sc.getName())){
                 ArrayList<String> times = new ArrayList<>();
-                if(sc.getRead()==true&&(Integer.parseInt(sc.getEndHour())!=0||Integer.parseInt(sc.getEndMinute())!=0||Integer.parseInt(sc.getEndSecond())!=0)){
-                    times.add("<html>Start: "+sc.getTime()+"<br/>"+"End: "+sc.getEndTime()+"</html>");
-                }
+                times.add("<html>Start: "+sc.getTime()+"<br/>"+"End: "+"</html>");
                 myMap.putIfAbsent(sc.getName(), times);
             }
             else{
-                if(sc.getRead()==true&&Integer.parseInt(sc.getEndHour())!=0&&Integer.parseInt(sc.getEndMinute())!=0&&Integer.parseInt(sc.getEndSecond())!=0){
-                    myMap.get(sc.getName()).add("<html>Start: "+sc.getTime()+"<br/>End: "+sc.getEndTime()+"</html>");
-                }
+                myMap.get(sc.getName()).add("<html>Start: "+sc.getTime()+"<br/>End: "+"</html>");
             }
         }
         this.myMaps=myMap;
