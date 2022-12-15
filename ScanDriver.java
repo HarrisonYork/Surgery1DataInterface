@@ -192,6 +192,6 @@ class FullScan {
         if(getname().contains("Surgeon")||getname().contains("surgeon")||getname().contains("resident")||getname().contains("Resident")){
             return "blue";
         }
-        return color;
+        return color;//test
     }
 }
