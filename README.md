@@ -1,4 +1,4 @@
-# TagTrackerDataInterface
+# SurgiScan
 Repository for display of data gained through use of the tag tracker device. Part of the Surgery 1, EGR101 project at Duke University.
 
 Getting Started:
